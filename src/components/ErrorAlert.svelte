@@ -11,8 +11,10 @@
       ? 'mb-3'
       : ''}"
   >
-    <Icon src={ExclamationTriangle} size="20" />
-    <span class="font-medium">
+    <div class="">
+      <Icon src={ExclamationTriangle} size="20" />
+    </div>
+    <span class="flex-auto font-medium">
       {error}
     </span>
   </div>

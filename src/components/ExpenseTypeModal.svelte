@@ -249,6 +249,8 @@
         reflectDeletedExpenseType(currentExpenseType);
         deleting = false;
         closeModal();
+      } else {
+        setError('Make sure to remove linked expenses from this expense type!')
       }
     }
   };
