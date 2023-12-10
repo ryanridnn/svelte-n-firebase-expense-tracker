@@ -10,6 +10,7 @@ import {
   serverTimestamp,
   getDocs,
   Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 import moment from "moment";
 import { getSnapsData, groupBasedOnKey } from "../helpers";
@@ -212,4 +213,45 @@ const changeMonthlyExpenseTypeAmount = async (
   await updateDoc(monthlyExpenseTypeRef, {
     amount: increment(diff),
   });
+};
+
+export const deleteExpense = async (
+  userId: string,
+  monthYearId: string,
+  expense: Expense,
+) => {
+  const monthYearRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+  );
+  const expenseRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+    DB_COLLECTIONS.expense,
+    expense.id,
+  );
+  const monthlyExpenseTypeRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+    DB_COLLECTIONS.monthlyExpenseType,
+    expense.type,
+  );
+
+  const payload = {
+    amount: increment(-1 * expense.amount),
+  };
+
+  await updateDoc(monthYearRef, payload);
+  await updateDoc(monthlyExpenseTypeRef, payload);
+
+  await deleteDoc(expenseRef);
 };

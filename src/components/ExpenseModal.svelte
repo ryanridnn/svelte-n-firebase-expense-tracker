@@ -5,16 +5,18 @@
   import { globalExpenseTypes } from "@/stores/expenseType";
   import { getExpenseTypes } from "@/firebase/expenseTypes";
   import { user } from "@/stores/user";
-  import type { ExpenseType } from "@/types";
+  import type { Expense, ExpenseType } from "@/types";
   import moment from "moment";
   import {
     createNewExpense,
+    deleteExpense,
     editExpense,
     type EditExpensePayload,
     type ExpenseChanged,
   } from "@/firebase/expenses";
   import { monthYear } from "@/stores/monthYear";
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
+  import { expenses } from "@/stores/expenses";
 
   let open: boolean = false;
   let typeOptions: ExpenseType[] = [];
@@ -110,9 +112,10 @@
     }
   };
 
-  const reflectEdited = (
+  const reflectEditedExpense = (
     newExpense: EditExpensePayload,
     changed: ExpenseChanged,
+    date: string,
   ) => {
     if (changed.amount) {
       const diff = newExpense.amount - newExpense.initAmount;
@@ -162,6 +165,30 @@
         });
       });
     }
+
+    expenses.update((currentGroupedExpensesArr) => {
+      return currentGroupedExpensesArr.map((eachGroup) => {
+        if (eachGroup.title === date) {
+          return {
+            ...eachGroup,
+            list: eachGroup.list.map((eachExpense) => {
+              if (eachExpense.id === newExpense.id) {
+                return {
+                  ...eachExpense,
+                  amount: newExpense.amount,
+                  note: newExpense.note,
+                  type: newExpense.type,
+                };
+              } else {
+                return eachExpense;
+              }
+            }),
+          };
+        } else {
+          return eachGroup;
+        }
+      });
+    });
   };
 
   const onSubmit = async () => {
@@ -212,7 +239,11 @@
             changed,
           );
 
-          reflectEdited(editExpensePayload, changed);
+          reflectEditedExpense(
+            editExpensePayload,
+            changed,
+            $expenseModalState.init.normalizedDate,
+          );
           closeModal();
         } else {
         }
@@ -232,7 +263,67 @@
     }
   };
 
+  const reflectDeletedExpense = (currentExpense: Expense) => {
+    monthYear.update((currentMonthYear) => {
+      if (currentMonthYear) {
+        return {
+          ...currentMonthYear,
+          amount: currentMonthYear.amount - currentExpense.amount,
+        };
+      } else {
+        return currentMonthYear;
+      }
+    });
+
+    monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
+      return currentMonthlyExpenseTypes.map((monthlyExpenseType) => {
+        if (monthlyExpenseType.id === currentExpense.id) {
+          return {
+            ...monthlyExpenseType,
+            amount: monthlyExpenseType.amount - currentExpense.amount,
+          };
+        } else {
+          return monthlyExpenseType;
+        }
+      });
+    });
+
+    expenses.update((currentGroupedExpensesArr) => {
+      return currentGroupedExpensesArr.map((eachGroup) => {
+        if (eachGroup.title === currentExpense.normalizedDate) {
+          return {
+            ...eachGroup,
+            list: eachGroup.list.filter(
+              (eachExpense) => eachExpense.id !== currentExpense.id,
+            ),
+          };
+        } else {
+          return eachGroup;
+        }
+      });
+    });
+  };
+
+  const onDelete = async () => {
+    if (
+      $user &&
+      $monthYear &&
+      $expenseModalState &&
+      $expenseModalState.type === "edit" &&
+      $expenseModalState.init
+    ) {
+      const currentExpense = $expenseModalState.init;
+
+      await deleteExpense($user.id, $monthYear.id, currentExpense);
+
+      reflectDeletedExpense(currentExpense);
+
+      closeModal();
+    }
+  };
+
   $: modalText = getModalText($expenseModalState);
+  $: showDelete = $expenseModalState && $expenseModalState.type === "edit";
 </script>
 
 <Modal {open} {closeModal}>
@@ -267,5 +358,12 @@
     <button on:click={onSubmit} class="btn btn-primary w-full rounded-md mt-7"
       >{modalText}</button
     >
+    {#if showDelete}
+      <button
+        on:click={onDelete}
+        class="btn bg-app-theme-red w-full rounded-md mt-4"
+        >Delete Expense</button
+      >
+    {/if}
   </div>
 </Modal>

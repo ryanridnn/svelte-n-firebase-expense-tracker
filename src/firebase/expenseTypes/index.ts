@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   increment,
@@ -75,4 +76,41 @@ export const createNewExpenseType = async (
     id: newExpenseTypeSnap.id,
     ...expenseTypePayload,
   };
+};
+
+export const deleteExpenseType = async (
+  userId: string,
+  monthYearId: string,
+  expenseType: MonthlyExpenseType,
+) => {
+  const monthYearRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+  );
+  const expenseTypeRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.expenseType,
+    expenseType.id,
+  );
+  const monthlyExpenseTypeRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+    DB_COLLECTIONS.monthlyExpenseType,
+    expenseType.id,
+  );
+
+  await updateDoc(monthYearRef, {
+    limit: increment(-1 * expenseType.limit),
+  });
+
+  await deleteDoc(expenseTypeRef);
+  await deleteDoc(monthlyExpenseTypeRef);
 };

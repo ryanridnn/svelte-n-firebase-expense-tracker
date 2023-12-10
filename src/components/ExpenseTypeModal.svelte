@@ -7,7 +7,10 @@
   } from "@/stores/modals";
   import { user } from "@/stores/user";
   import { monthYear } from "@/stores/monthYear";
-  import { createNewExpenseType } from "@/firebase/expenseTypes";
+  import {
+    createNewExpenseType,
+    deleteExpenseType,
+  } from "@/firebase/expenseTypes";
   import { globalExpenseTypes } from "@/stores/expenseType";
   import {
     editExpenseType,
@@ -15,6 +18,7 @@
     type ExpenseTypeChanged,
   } from "@/firebase/monthlyExpenseTypes";
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
+  import type { MonthlyExpenseType } from "@/types";
 
   let open: boolean = false;
 
@@ -187,7 +191,49 @@
     }
   };
 
+  const reflectDeletedExpenseType = (
+    currentExpenseType: MonthlyExpenseType,
+  ) => {
+    monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
+      return currentMonthlyExpenseTypes.filter(
+        (each) => each.id !== currentExpenseType.id,
+      );
+    });
+
+    monthYear.update((currentMonthYear) => {
+      if (currentMonthYear) {
+        return {
+          ...currentMonthYear,
+          limit: currentMonthYear.limit - currentExpenseType.limit,
+        };
+      } else {
+        return currentMonthYear;
+      }
+    });
+  };
+
+  const onDelete = async () => {
+    if (
+      $user &&
+      $monthYear &&
+      $expenseTypeModalState &&
+      $expenseTypeModalState.type === "edit" &&
+      $expenseTypeModalState.init
+    ) {
+      const currentExpenseType = $expenseTypeModalState.init;
+
+      if (currentExpenseType.amount === 0) {
+        await deleteExpenseType($user.id, $monthYear.id, currentExpenseType);
+
+        reflectDeletedExpenseType(currentExpenseType);
+        closeModal();
+      }
+    }
+  };
+
   $: modalText = getModalText($expenseTypeModalState);
+  $: showDelete =
+    $expenseTypeModalState && $expenseTypeModalState.type === "edit";
 </script>
 
 <Modal {open} {closeModal}>
@@ -212,5 +258,12 @@
     <button on:click={onSubmit} class="btn btn-primary w-full rounded-md mt-7"
       >{modalText}</button
     >
+    {#if showDelete}
+      <button
+        on:click={onDelete}
+        class="btn bg-app-theme-red w-full rounded-md mt-4"
+        >Delete Expense Type</button
+      >
+    {/if}
   </div>
 </Modal>
