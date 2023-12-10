@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Manrope", sans-serif;
+}
+
+.main-gradient {
+  background: linear-gradient(
+    98deg,
+    rgba(91, 154, 139, 0.2) 1.52%,
+    rgba(91, 154, 139, 0.12) 100%
+  );
+}
+
+.btn {
+  @apply py-[10px] font-bold text-base px-3 rounded focus:bg-opacity-[.8] transition duration-150;
+}
+
+.btn-primary {
+  /* @apply py-[10px] font-bold text-base px-3 rounded; */
+  @apply bg-app-theme-yellow text-app-text-dark;
+}
+
+.btn-danger {
+  @apply bg-app-theme-red;
+}
+
+.input {
+  @apply bg-app-input-bg-normal focus:bg-app-input-bg-focus px-3 py-[10px] rounded-lg border-[1px] border-solid border-app-input-outline-normal focus:border-app-input-outline-focus focus:outline-none transition duration-150;
+}
