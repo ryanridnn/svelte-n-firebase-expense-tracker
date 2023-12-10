@@ -17,6 +17,7 @@
   import { monthYear } from "@/stores/monthYear";
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
   import { expenses } from "@/stores/expenses";
+  import LoadingButton from "@/components/LoadingButton.svelte";
 
   let open: boolean = false;
   let typeOptions: ExpenseType[] = [];
@@ -25,6 +26,8 @@
   let note: string = "";
   let type: string = "";
   let loading: boolean = false;
+  let addingOrEditing: boolean = false;
+  let deleting: boolean = false;
 
   const closeModal = () => {
     // open = false;
@@ -204,11 +207,8 @@
 
       if ($expenseModalState.type === "add") {
         loading = true;
-        const newExpense = await createNewExpense(
-          $user.id,
-          $monthYear.id,
-          payload,
-        );
+        addingOrEditing = true;
+        await createNewExpense($user.id, $monthYear.id, payload);
         monthYear.update((prev) => {
           if (prev) {
             return {
@@ -219,7 +219,8 @@
             return prev;
           }
         });
-        expenseModalState.set(false);
+        addingOrEditing = false;
+        closeModal();
       } else if (
         $expenseModalState.type === "edit" &&
         $expenseModalState.init
@@ -227,6 +228,7 @@
         const changed = validateChange();
         if (changed.overall) {
           loading = true;
+          addingOrEditing = true;
           const editExpensePayload = {
             id: $expenseModalState.init.id,
             amount,
@@ -248,6 +250,7 @@
             changed,
             $expenseModalState.init.normalizedDate,
           );
+          addingOrEditing = false;
           closeModal();
         } else {
         }
@@ -255,15 +258,15 @@
     }
   };
 
-  const getModalText = (modalState: ExpenseModalState | false) => {
+  const getModalMode = (modalState: ExpenseModalState | false) => {
     if (modalState) {
       if (modalState.type === "add") {
-        return "Add Expense";
+        return "add";
       } else {
-        return "Edit Expense";
+        return "edit";
       }
     } else {
-      return "Add Expense";
+      return "add";
     }
   };
 
@@ -317,22 +320,27 @@
       $expenseModalState.init
     ) {
       loading = true;
+      deleting = true;
       const currentExpense = $expenseModalState.init;
 
       await deleteExpense($user.id, $monthYear.id, currentExpense);
 
       reflectDeletedExpense(currentExpense);
 
+      deleting = false;
       closeModal();
     }
   };
 
-  $: modalText = getModalText($expenseModalState);
+  $: modalMode = getModalMode($expenseModalState);
   $: showDelete = $expenseModalState && $expenseModalState.type === "edit";
+  $: console.log(loading);
 </script>
 
 <Modal {open} {closeModal}>
-  <span class="font-bold text-xl" slot="header">{modalText}</span>
+  <span class="font-bold text-xl" slot="header"
+    >{modalMode === "edit" ? "Edit Expense" : "Add Expense"}</span
+  >
   <div class="mt-4 font-medium">
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-2">
@@ -360,18 +368,29 @@
         {/if}
       </div>
     </div>
-    <button
+    <LoadingButton
+      class="btn btn-primary w-full rounded-md mt-7"
       disabled={loading}
       on:click={onSubmit}
-      class="btn btn-primary w-full rounded-md mt-7">{modalText}</button
+      loading={addingOrEditing}
     >
+      <span slot="normalText"
+        >{modalMode === "edit" ? "Edit Expense" : "Add Expense"}</span
+      >
+      <span slot="loadingText"
+        >{modalMode === "edit" ? "Editing..." : "Adding..."}</span
+      >
+    </LoadingButton>
     {#if showDelete}
-      <button
+      <LoadingButton
+        loading={deleting}
         on:click={onDelete}
         disabled={loading}
         class="btn bg-app-theme-red w-full rounded-md mt-4"
-        >Delete Expense</button
       >
+        <span slot="normalText">Delete Expense</span>
+        <span slot="loadingText">Deleting...</span>
+      </LoadingButton>
     {/if}
   </div>
 </Modal>

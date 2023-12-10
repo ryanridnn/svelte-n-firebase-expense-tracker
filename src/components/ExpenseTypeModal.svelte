@@ -19,12 +19,15 @@
   } from "@/firebase/monthlyExpenseTypes";
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
   import type { MonthlyExpenseType } from "@/types";
+  import LoadingButton from "@/components/LoadingButton.svelte";
 
   let open: boolean = false;
 
   let name: string = "";
   let limit: number = 0;
   let loading: boolean = false;
+  let addingOrEditing = false;
+  let deleting = false;
 
   $: {
     if ($expenseTypeModalState) {
@@ -133,6 +136,7 @@
 
       if ($expenseTypeModalState.type === "add") {
         loading = true;
+        addingOrEditing = true;
         const newExpenseType = await createNewExpenseType(
           $user.id,
           $monthYear.id,
@@ -151,6 +155,7 @@
             return prev;
           }
         });
+        addingOrEditing = false;
         closeModal();
       } else if (
         $expenseTypeModalState.type === "edit" &&
@@ -160,6 +165,7 @@
 
         if (changed.overall) {
           loading = true;
+          addingOrEditing = true;
           const editExpenseTypePayload = {
             id: $expenseTypeModalState.init.id,
             name,
@@ -176,6 +182,7 @@
 
           reflectExpenseTypeEdit(editExpenseTypePayload, changed);
 
+          addingOrEditing = false;
           closeModal();
         } else {
         }
@@ -183,15 +190,15 @@
     }
   };
 
-  const getModalText = (modalState: ExpenseTypeModalState | false) => {
+  const getModalMode = (modalState: ExpenseTypeModalState | false) => {
     if (modalState) {
       if (modalState.type === "add") {
-        return "Add Expense Type";
+        return "add";
       } else {
-        return "Edit Expense Type";
+        return "edit";
       }
     } else {
-      return "Add Expense Type";
+      return "add";
     }
   };
 
@@ -228,21 +235,25 @@
 
       if (currentExpenseType.amount === 0) {
         loading = true;
+        deleting = true;
         await deleteExpenseType($user.id, $monthYear.id, currentExpenseType);
 
         reflectDeletedExpenseType(currentExpenseType);
+        deleting = false;
         closeModal();
       }
     }
   };
 
-  $: modalText = getModalText($expenseTypeModalState);
+  $: modalMode = getModalMode($expenseTypeModalState);
   $: showDelete =
     $expenseTypeModalState && $expenseTypeModalState.type === "edit";
 </script>
 
 <Modal {open} {closeModal}>
-  <span class="font-bold text-xl" slot="header">{modalText}</span>
+  <span class="font-bold text-xl" slot="header"
+    >{modalMode === "edit" ? "Edit Expense Type" : "Add Expense Type"}</span
+  >
   <div class="mt-4 font-medium">
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-2">
@@ -260,18 +271,29 @@
         <CurrencyInput value={limit} onValueChange={onLimitChange} />
       </div>
     </div>
-    <button
+    <LoadingButton
+      loading={addingOrEditing}
       on:click={onSubmit}
       disabled={loading}
-      class="btn btn-primary w-full rounded-md mt-7">{modalText}</button
+      class="btn btn-primary w-full rounded-md mt-7"
     >
+      <span slot="normalText"
+        >{modalMode === "edit" ? "Edit Expense Type" : "Add Expense Type"}</span
+      >
+      <span slot="loadingText">
+        {modalMode === "edit" ? "Editing..." : "Adding..."}
+      </span>
+    </LoadingButton>
     {#if showDelete}
-      <button
+      <LoadingButton
+        loading={deleting}
         on:click={onDelete}
         disabled={loading}
         class="btn bg-app-theme-red w-full rounded-md mt-4"
-        >Delete Expense Type</button
       >
+        <span slot="normalText">Delete Expense Type</span>
+        <span slot="loadingText">Deleting...</span>
+      </LoadingButton>
     {/if}
   </div>
 </Modal>
