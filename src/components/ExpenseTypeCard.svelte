@@ -51,7 +51,7 @@
     <div
       class="w-full h-full rounded-full {barBg}"
       style="width: {percentage > 100
-        ? `${1 / percentage}%`
+        ? `${(100 / percentage) * 100}%`
         : `${percentage}%`}"
     ></div>
   </div>

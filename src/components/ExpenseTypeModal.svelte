@@ -24,6 +24,7 @@
 
   let name: string = "";
   let limit: number = 0;
+  let loading: boolean = false;
 
   $: {
     if ($expenseTypeModalState) {
@@ -47,6 +48,7 @@
 
   const closeModal = () => {
     expenseTypeModalState.set(false);
+    loading = false;
   };
 
   const onNameChange = (e: any) => {
@@ -130,6 +132,7 @@
       };
 
       if ($expenseTypeModalState.type === "add") {
+        loading = true;
         const newExpenseType = await createNewExpenseType(
           $user.id,
           $monthYear.id,
@@ -148,7 +151,7 @@
             return prev;
           }
         });
-        open = false;
+        closeModal();
       } else if (
         $expenseTypeModalState.type === "edit" &&
         $expenseTypeModalState.init
@@ -156,6 +159,7 @@
         const changed = validateChange();
 
         if (changed.overall) {
+          loading = true;
           const editExpenseTypePayload = {
             id: $expenseTypeModalState.init.id,
             name,
@@ -223,6 +227,7 @@
       const currentExpenseType = $expenseTypeModalState.init;
 
       if (currentExpenseType.amount === 0) {
+        loading = true;
         await deleteExpenseType($user.id, $monthYear.id, currentExpenseType);
 
         reflectDeletedExpenseType(currentExpenseType);
@@ -255,12 +260,15 @@
         <CurrencyInput value={limit} onValueChange={onLimitChange} />
       </div>
     </div>
-    <button on:click={onSubmit} class="btn btn-primary w-full rounded-md mt-7"
-      >{modalText}</button
+    <button
+      on:click={onSubmit}
+      disabled={loading}
+      class="btn btn-primary w-full rounded-md mt-7">{modalText}</button
     >
     {#if showDelete}
       <button
         on:click={onDelete}
+        disabled={loading}
         class="btn bg-app-theme-red w-full rounded-md mt-4"
         >Delete Expense Type</button
       >

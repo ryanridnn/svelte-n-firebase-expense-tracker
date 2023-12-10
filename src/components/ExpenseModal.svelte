@@ -24,10 +24,12 @@
   let amount: number = 0;
   let note: string = "";
   let type: string = "";
+  let loading: boolean = false;
 
   const closeModal = () => {
     // open = false;
     expenseModalState.set(false);
+    loading = false;
   };
 
   const fetchTypeOptions = async () => {
@@ -201,6 +203,7 @@
       };
 
       if ($expenseModalState.type === "add") {
+        loading = true;
         const newExpense = await createNewExpense(
           $user.id,
           $monthYear.id,
@@ -223,6 +226,7 @@
       ) {
         const changed = validateChange();
         if (changed.overall) {
+          loading = true;
           const editExpensePayload = {
             id: $expenseModalState.init.id,
             amount,
@@ -312,6 +316,7 @@
       $expenseModalState.type === "edit" &&
       $expenseModalState.init
     ) {
+      loading = true;
       const currentExpense = $expenseModalState.init;
 
       await deleteExpense($user.id, $monthYear.id, currentExpense);
@@ -355,12 +360,15 @@
         {/if}
       </div>
     </div>
-    <button on:click={onSubmit} class="btn btn-primary w-full rounded-md mt-7"
-      >{modalText}</button
+    <button
+      disabled={loading}
+      on:click={onSubmit}
+      class="btn btn-primary w-full rounded-md mt-7">{modalText}</button
     >
     {#if showDelete}
       <button
         on:click={onDelete}
+        disabled={loading}
         class="btn bg-app-theme-red w-full rounded-md mt-4"
         >Delete Expense</button
       >
