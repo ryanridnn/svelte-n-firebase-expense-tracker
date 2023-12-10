@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import moment from "moment";
 import { getSnapsData, groupBasedOnKey } from "../helpers";
+import { expenseModalState } from "@/stores/modals";
 
 export interface ExpensePayload extends Omit<Expense, "id" | "createdAt"> {}
 
@@ -109,4 +110,106 @@ export const getExpenses = async (
   const grouped = groupBasedOnKey<Expense, string>(expenses, "normalizedDate");
 
   return grouped;
+};
+
+export interface ExpenseChanged {
+  overall: boolean;
+  amount: boolean;
+  note: boolean;
+  type: boolean;
+}
+
+export interface EditExpensePayload
+  extends Omit<Expense, "expenseType" | "createdAt" | "normalizedDate"> {
+  initAmount: number;
+  initType: string;
+}
+
+export const editExpense = async (
+  userId: string,
+  monthYearId: string,
+  expense: EditExpensePayload,
+  changed: ExpenseChanged,
+) => {
+  const diff = expense.amount - expense.initAmount;
+
+  if (changed.amount) {
+    await changeMonthYearAmount(userId, monthYearId, diff);
+  }
+
+  if (changed.type) {
+    await changeMonthlyExpenseTypeAmount(
+      userId,
+      monthYearId,
+      expense.initType,
+      -1 * expense.initAmount,
+    );
+    await changeMonthlyExpenseTypeAmount(
+      userId,
+      monthYearId,
+      expense.type,
+      expense.amount,
+    );
+  } else if (changed.amount) {
+    await changeMonthlyExpenseTypeAmount(
+      userId,
+      monthYearId,
+      expense.type,
+      diff,
+    );
+  }
+
+  const expenseRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+    DB_COLLECTIONS.expense,
+    expense.id,
+  );
+  await updateDoc(expenseRef, {
+    amount: expense.amount,
+    note: expense.note,
+    type: expense.type,
+  });
+};
+
+const changeMonthYearAmount = async (
+  userId: string,
+  monthYearId: string,
+  diff: number,
+) => {
+  const monthYearRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+  );
+
+  await updateDoc(monthYearRef, {
+    amount: increment(diff),
+  });
+};
+
+const changeMonthlyExpenseTypeAmount = async (
+  userId: string,
+  monthYearId: string,
+  expenseTypeId: string,
+  diff: number,
+) => {
+  const monthlyExpenseTypeRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+    DB_COLLECTIONS.monthlyExpenseType,
+    expenseTypeId,
+  );
+
+  await updateDoc(monthlyExpenseTypeRef, {
+    amount: increment(diff),
+  });
 };

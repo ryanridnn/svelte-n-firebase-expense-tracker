@@ -42,11 +42,12 @@
     currency="IDR"
     isNegativeAllowed={false}
     inputClasses={{
-      wrapper: `input ${
+      wrapper: `input w-full ${
         focus ? "!bg-app-input-bg-focus !border-app-input-outline-focus" : ""
       }`,
-      formatted:
-        "currency-input bg-app-input-bg-normal focus:outline-none font-medium !text-app-text-light",
+      formatted: `currency-input w-full bg-app-input-bg-normal focus:outline-none font-medium !text-app-text-light ${
+        focus ? "!bg-app-input-bg-focus" : ""
+      }`,
     }}
   />
 </div>

@@ -9,7 +9,7 @@
   };
 </script>
 
-<div class="mt-6 flex flex-col gap-8">
+<div class="mt-6 flex flex-col gap-8 pb-20">
   {#each $expenses as group}
     <div class="w-full">
       <div class="flex justify-center w-full mx-auto text-xs font-semibold">

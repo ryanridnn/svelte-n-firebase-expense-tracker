@@ -1,15 +1,20 @@
 <script lang="ts">
   import Modal from "@/components/Modal.svelte";
-  import { expenseModalState } from "@/stores/modals";
+  import { expenseModalState, type ExpenseModalState } from "@/stores/modals";
   import CurrencyInput from "@/components/CurrencyInput.svelte";
-  // import { onMount } from "svelte";
   import { globalExpenseTypes } from "@/stores/expenseType";
   import { getExpenseTypes } from "@/firebase/expenseTypes";
   import { user } from "@/stores/user";
   import type { ExpenseType } from "@/types";
   import moment from "moment";
-  import { createNewExpense } from "@/firebase/expenses";
+  import {
+    createNewExpense,
+    editExpense,
+    type EditExpensePayload,
+    type ExpenseChanged,
+  } from "@/firebase/expenses";
   import { monthYear } from "@/stores/monthYear";
+  import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
 
   let open: boolean = false;
   let typeOptions: ExpenseType[] = [];
@@ -19,7 +24,8 @@
   let type: string = "";
 
   const closeModal = () => {
-    open = false;
+    // open = false;
+    expenseModalState.set(false);
   };
 
   const fetchTypeOptions = async () => {
@@ -31,14 +37,31 @@
     }
   };
 
-  $: (() => {
+  $: {
     if ($expenseModalState) {
       fetchTypeOptions();
       open = true;
     } else {
       open = false;
+      clearValues();
     }
-  })();
+
+    if (
+      $expenseModalState &&
+      $expenseModalState.type === "edit" &&
+      $expenseModalState.init
+    ) {
+      amount = $expenseModalState.init.amount;
+      note = $expenseModalState.init.note;
+      type = $expenseModalState.init.type;
+    }
+  }
+
+  const clearValues = () => {
+    amount = 0;
+    note = "";
+    type = "";
+  };
 
   const onAmountChange = (e: number) => {
     amount = e;
@@ -50,6 +73,95 @@
 
   const onTypeChange = (e: any) => {
     type = e.target.value;
+  };
+
+  const validateChange = () => {
+    const changed: ExpenseChanged = {
+      amount: false,
+      note: false,
+      type: false,
+      overall: false,
+    };
+
+    if (
+      $expenseModalState &&
+      $expenseModalState.type === "edit" &&
+      $expenseModalState.init
+    ) {
+      const currentExpense = $expenseModalState.init;
+
+      if (amount !== currentExpense.amount) {
+        changed.amount = true;
+      }
+
+      if (note !== currentExpense.note) {
+        changed.note = true;
+      }
+
+      if (type !== currentExpense.type) {
+        changed.type = true;
+      }
+
+      changed.overall = changed.amount || changed.note || changed.type;
+
+      return changed;
+    } else {
+      return changed;
+    }
+  };
+
+  const reflectEdited = (
+    newExpense: EditExpensePayload,
+    changed: ExpenseChanged,
+  ) => {
+    if (changed.amount) {
+      const diff = newExpense.amount - newExpense.initAmount;
+
+      monthYear.update((currentMonthYear) => {
+        if (currentMonthYear) {
+          return {
+            ...currentMonthYear,
+            amount: currentMonthYear.amount + diff,
+          };
+        } else {
+          return currentMonthYear;
+        }
+      });
+    }
+
+    if (changed.type) {
+      monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
+        return currentMonthlyExpenseTypes.map((each) => {
+          if (each.id === newExpense.initType) {
+            return {
+              ...each,
+              amount: each.amount - 1 * newExpense.initAmount,
+            };
+          } else if (each.id === newExpense.type) {
+            return {
+              ...each,
+              amount: each.amount + newExpense.amount,
+            };
+          } else {
+            return each;
+          }
+        });
+      });
+    } else if (changed.amount) {
+      const diff = newExpense.amount - newExpense.initAmount;
+      monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
+        return currentMonthlyExpenseTypes.map((each) => {
+          if (each.id == newExpense.type) {
+            return {
+              ...each,
+              amount: each.amount + diff,
+            };
+          } else {
+            return each;
+          }
+        });
+      });
+    }
   };
 
   const onSubmit = async () => {
@@ -78,13 +190,53 @@
           }
         });
         expenseModalState.set(false);
+      } else if (
+        $expenseModalState.type === "edit" &&
+        $expenseModalState.init
+      ) {
+        const changed = validateChange();
+        if (changed.overall) {
+          const editExpensePayload = {
+            id: $expenseModalState.init.id,
+            amount,
+            note,
+            type,
+            initAmount: $expenseModalState.init.amount,
+            initType: $expenseModalState.init.type,
+          };
+
+          await editExpense(
+            $user.id,
+            $monthYear.id,
+            editExpensePayload,
+            changed,
+          );
+
+          reflectEdited(editExpensePayload, changed);
+          closeModal();
+        } else {
+        }
       }
     }
   };
+
+  const getModalText = (modalState: ExpenseModalState | false) => {
+    if (modalState) {
+      if (modalState.type === "add") {
+        return "Add Expense";
+      } else {
+        return "Edit Expense";
+      }
+    } else {
+      return "Add Expense";
+    }
+  };
+
+  $: modalText = getModalText($expenseModalState);
 </script>
 
 <Modal {open} {closeModal}>
-  <span class="font-bold text-xl" slot="header">Add Expense</span>
+  <span class="font-bold text-xl" slot="header">{modalText}</span>
   <div class="mt-4 font-medium">
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-2">
@@ -113,7 +265,7 @@
       </div>
     </div>
     <button on:click={onSubmit} class="btn btn-primary w-full rounded-md mt-7"
-      >Add Expense</button
+      >{modalText}</button
     >
   </div>
 </Modal>

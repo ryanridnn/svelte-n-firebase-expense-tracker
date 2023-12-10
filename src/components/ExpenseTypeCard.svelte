@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatRupiah, numToFixed } from "@/helpers";
+  import { expenseTypeModalState } from "@/stores/modals";
   import type { MonthlyExpenseType } from "@/types";
   import { Icon, ArrowLongRight } from "svelte-hero-icons";
 
@@ -21,9 +22,19 @@
   );
   $: barBg = getBarBg(percentage);
   $: lineBg = percentage >= 100 ? "danger" : "primary";
+
+  const onClick = () => {
+    expenseTypeModalState.set({
+      type: "edit",
+      init: monthlyExpenseType,
+    });
+  };
 </script>
 
-<div class="px-4 py-3 main-gradient rounded-lg">
+<button
+  on:click={onClick}
+  class="px-4 py-3 main-gradient rounded-lg hover:scale-[.96] transition duration-200"
+>
   <div class="flex items-center justify-between font-bold text-lg">
     <span>
       {monthlyExpenseType.name}
@@ -56,4 +67,4 @@
       )}
     </div>
   </div>
-</div>
+</button>

@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { Expense, ExpenseType } from "@/types";
+import type { Expense, MonthlyExpenseType } from "@/types";
 
 export interface ExpenseModalState {
   type: "add" | "edit";
@@ -10,7 +10,7 @@ export const expenseModalState = writable<ExpenseModalState | false>(false);
 
 export interface ExpenseTypeModalState {
   type: "add" | "edit";
-  init?: ExpenseType;
+  init?: MonthlyExpenseType;
 }
 
 export const expenseTypeModalState = writable<ExpenseTypeModalState | false>(
