@@ -20,6 +20,8 @@
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
   import type { MonthlyExpenseType } from "@/types";
   import LoadingButton from "@/components/LoadingButton.svelte";
+  import ErrorAlert from "@/components/ErrorAlert.svelte";
+  import { useError } from "@/hooks/error";
 
   let open: boolean = false;
 
@@ -28,6 +30,8 @@
   let loading: boolean = false;
   let addingOrEditing = false;
   let deleting = false;
+
+  const { error, setError, clearError } = useError();
 
   $: {
     if ($expenseTypeModalState) {
@@ -40,6 +44,7 @@
     } else {
       open = false;
 
+      clearError();
       clearValues();
     }
   }
@@ -185,8 +190,11 @@
           addingOrEditing = false;
           closeModal();
         } else {
+          setError("Please change something to edit!");
         }
       }
+    } else {
+      setError("Make sure to enter some values!");
     }
   };
 
@@ -255,6 +263,7 @@
     >{modalMode === "edit" ? "Edit Expense Type" : "Add Expense Type"}</span
   >
   <div class="mt-4 font-medium">
+    <ErrorAlert error={$error} addMarginBottom />
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-2">
         <label for="expense-note">Name</label>

@@ -4,7 +4,7 @@ export const useError = () => {
   const error = writable<string>("");
   let timeout: any;
 
-  const setError = (message: string, time: number = 3000) => {
+  const setError = (message: string, time: number = 5000) => {
     if (timeout) {
       clearTimeout(timeout);
     }
@@ -16,5 +16,13 @@ export const useError = () => {
     }, time);
   };
 
-  return { error, setError };
+  const clearError = () => {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    error.set("");
+  };
+
+  return { error, setError, clearError };
 };

@@ -18,6 +18,8 @@
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
   import { expenses } from "@/stores/expenses";
   import LoadingButton from "@/components/LoadingButton.svelte";
+  import { useError } from "@/hooks/error";
+  import ErrorAlert from "@/components/ErrorAlert.svelte";
 
   let open: boolean = false;
   let typeOptions: ExpenseType[] = [];
@@ -29,8 +31,9 @@
   let addingOrEditing: boolean = false;
   let deleting: boolean = false;
 
+  const { error, setError, clearError } = useError();
+
   const closeModal = () => {
-    // open = false;
     expenseModalState.set(false);
     loading = false;
   };
@@ -50,6 +53,7 @@
       open = true;
     } else {
       open = false;
+      clearError();
       clearValues();
     }
 
@@ -253,8 +257,11 @@
           addingOrEditing = false;
           closeModal();
         } else {
+          setError("Please change something to edit!");
         }
       }
+    } else {
+      setError("Make sure to enter some values!");
     }
   };
 
@@ -334,7 +341,6 @@
 
   $: modalMode = getModalMode($expenseModalState);
   $: showDelete = $expenseModalState && $expenseModalState.type === "edit";
-  $: console.log(loading);
 </script>
 
 <Modal {open} {closeModal}>
@@ -342,6 +348,7 @@
     >{modalMode === "edit" ? "Edit Expense" : "Add Expense"}</span
   >
   <div class="mt-4 font-medium">
+    <ErrorAlert error={$error} addMarginBottom />
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-2">
         <label for="expense-nominal">Amount</label>
