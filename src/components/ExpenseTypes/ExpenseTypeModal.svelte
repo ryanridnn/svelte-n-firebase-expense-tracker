@@ -55,10 +55,6 @@
     expenseTypeModalState.set(false);
   };
 
-  const onNameChange = (e: any) => {
-    name = e.target.value;
-  };
-
   const onLimitChange = (e: number) => {
     limit = e;
   };
@@ -198,13 +194,7 @@
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-2">
         <label for="expense-note">Name</label>
-        <input
-          type="text"
-          class="input"
-          value={name}
-          on:change={onNameChange}
-          id="expense-note"
-        />
+        <input type="text" class="input" bind:value={name} id="expense-note" />
       </div>
       <div class="flex flex-col gap-2">
         <label for="expense-nominal">Limit</label>

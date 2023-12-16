@@ -1,6 +1,9 @@
+import _ from "lodash";
+import moment from "moment";
 import { DB_COLLECTIONS } from "@/const";
 import { db } from "@/firebase";
 import {
+  getMonthName,
   getMonthYearData,
   getSnapData,
   getSnapsData,
@@ -15,12 +18,20 @@ import {
   setDoc,
 } from "firebase/firestore";
 import type { MonthYear, ExpenseType } from "@/types";
-import _ from "lodash";
+
+const months = moment.months();
 
 export const getMonthYear = async (
   userId: string,
-  id: string,
+  month: number,
+  year: number,
 ): Promise<MonthYear> => {
+  const monthName = getMonthName(month);
+
+  const id = moment(`${monthName}-${year}`, "MMMM-YYYY")
+    .format("MMM-YYYY")
+    .toLowerCase();
+
   const monthYearRef = doc(
     db,
     DB_COLLECTIONS.Users,
@@ -31,8 +42,20 @@ export const getMonthYear = async (
 
   const snap = await getDoc(monthYearRef);
 
+  const currentMonth = moment().month();
+  const currentYear = moment().year();
+
   if (snap.exists()) {
     return getSnapData(snap) as MonthYear;
+  } else if (month < currentMonth && year <= currentYear) {
+    return {
+      id,
+      amount: 0,
+      limit: 0,
+      month: monthName,
+      year,
+      notExist: true,
+    };
   } else {
     return createMonthYear(userId, id);
   }

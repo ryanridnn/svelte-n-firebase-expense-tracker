@@ -1,7 +1,13 @@
 import moment from "moment";
 import _ from "lodash";
 
+const months = moment.months();
+
 import type { Grouped } from "@/types";
+
+export const getMonthName = (index: number) => {
+  return months[index];
+};
 
 export const getSnapsData = (snaps: any) => {
   const data = snaps.docs.map((snap: any) => getSnapData(snap));

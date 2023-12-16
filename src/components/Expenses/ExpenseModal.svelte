@@ -92,14 +92,6 @@
     amount = e;
   };
 
-  const onNoteChange = (e: any) => {
-    note = e.target.value;
-  };
-
-  const onTypeChange = (e: any) => {
-    type = e.target.value;
-  };
-
   const onSubmit = async () => {
     if (amount && type && $expenseModalState && $monthYear && $user) {
       const payload = {
@@ -208,18 +200,12 @@
       </div>
       <div class="flex flex-col gap-2">
         <label for="expense-note">Note</label>
-        <input
-          type="text"
-          class="input"
-          value={note}
-          on:change={onNoteChange}
-          id="expense-note"
-        />
+        <input type="text" class="input" bind:value={note} id="expense-note" />
       </div>
       <div class="flex flex-col gap-2">
         <label for="expense-type">Type</label>
         {#if typeOptions.length > 0}
-          <select class="input" value={type} on:change={onTypeChange}>
+          <select class="input" bind:value={type}>
             {#each typeOptions as typeOption}
               <option value={typeOption.id}>{typeOption.name}</option>
             {/each}

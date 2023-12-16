@@ -11,6 +11,7 @@ export interface MonthYear {
   year: number;
   month: string;
   limit: number;
+  notExist?: boolean;
 }
 
 export interface ExpenseType {
