@@ -1,15 +1,7 @@
 <script lang="ts">
-  import Tabs from "@/components/Tabs.svelte";
+  import Tabs from "@/components/Home/Tabs.svelte";
   import { formatRupiah, numToFixed } from "@/helpers";
   import { monthYear } from "@/stores/monthYear";
-
-  const getLimit = () => {
-    if (!$monthYear || $monthYear?.limit === 0) {
-      return "-";
-    } else {
-      return numToFixed(($monthYear?.amount / $monthYear?.limit) * 100, 1);
-    }
-  };
 
   $: amount = formatRupiah($monthYear?.amount || 0);
   $: limit = (() => {

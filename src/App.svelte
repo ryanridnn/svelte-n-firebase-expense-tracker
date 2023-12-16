@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Router, Route } from "svelte-navigator";
 
-  import Home from "@/components/Home.svelte";
-  import Login from "@/components/Login.svelte";
-  import AuthRedirector from "@/components/AuthRedirector.svelte";
-  import Layout from "@/components/Layout.svelte";
+  import Home from "@/components/Home/Home.svelte";
+  import Login from "@/components/Login/Login.svelte";
+  import AuthRedirector from "@/components/Layout/AuthRedirector.svelte";
+  import Layout from "@/components/Layout/Layout.svelte";
 </script>
 
 <Router>

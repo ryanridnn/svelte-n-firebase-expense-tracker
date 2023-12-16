@@ -2,7 +2,7 @@
   import { expenseModalState } from "@/stores/modals";
   import { expenses } from "@/stores/expenses";
   import moment from "moment";
-  import ExpenseCard from "@/components/ExpenseCard.svelte";
+  import ExpenseCard from "@/components/Expenses/ExpenseCard.svelte";
 
   const openModal = () => {
     expenseModalState.set({ type: "add" });

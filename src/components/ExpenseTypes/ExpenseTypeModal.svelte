@@ -1,10 +1,7 @@
 <script lang="ts">
-  import Modal from "@/components/Modal.svelte";
-  import CurrencyInput from "@/components/CurrencyInput.svelte";
-  import {
-    expenseTypeModalState,
-    type ExpenseTypeModalState,
-  } from "@/stores/modals";
+  import Modal from "@/components/Common/Modal.svelte";
+  import CurrencyInput from "@/components/Common/CurrencyInput.svelte";
+  import { expenseTypeModalState } from "@/stores/modals";
   import { user } from "@/stores/user";
   import { monthYear } from "@/stores/monthYear";
   import {
@@ -12,16 +9,15 @@
     deleteExpenseType,
   } from "@/firebase/expenseTypes";
   import { globalExpenseTypes } from "@/stores/expenseType";
-  import {
-    editExpenseType,
-    type EditExpenseTypePayload,
-    type ExpenseTypeChanged,
-  } from "@/firebase/monthlyExpenseTypes";
-  import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
-  import type { MonthlyExpenseType } from "@/types";
-  import LoadingButton from "@/components/LoadingButton.svelte";
-  import ErrorAlert from "@/components/ErrorAlert.svelte";
+  import { editExpenseType } from "@/firebase/monthlyExpenseTypes";
+  import LoadingButton from "@/components/Common/LoadingButton.svelte";
+  import ErrorAlert from "@/components/Common/ErrorAlert.svelte";
   import { useError } from "@/hooks/error";
+  import {
+    getModalMode,
+    reflectDeletedExpenseType,
+    reflectExpenseTypeEdit,
+  } from "@/components/ExpenseTypes/helpers";
 
   let open: boolean = false;
 
@@ -52,11 +48,11 @@
   const clearValues = () => {
     name = "";
     limit = 0;
+    loading = false;
   };
 
   const closeModal = () => {
     expenseTypeModalState.set(false);
-    loading = false;
   };
 
   const onNameChange = (e: any) => {
@@ -94,40 +90,6 @@
       return changed;
     } else {
       return changed;
-    }
-  };
-
-  const reflectExpenseTypeEdit = (
-    newExpenseType: EditExpenseTypePayload,
-    changed: ExpenseTypeChanged,
-  ) => {
-    monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
-      return currentMonthlyExpenseTypes.map((each) => {
-        if (each.id === newExpenseType.id) {
-          return {
-            ...each,
-            name: newExpenseType.name,
-            limit: newExpenseType.limit,
-          };
-        } else {
-          return each;
-        }
-      });
-    });
-
-    if (changed.limit) {
-      const diff = newExpenseType.limit - newExpenseType.initLimit;
-
-      monthYear.update((currentMonthYear) => {
-        if (currentMonthYear) {
-          return {
-            ...currentMonthYear,
-            limit: currentMonthYear.limit + diff,
-          };
-        } else {
-          return currentMonthYear;
-        }
-      });
     }
   };
 
@@ -198,39 +160,6 @@
     }
   };
 
-  const getModalMode = (modalState: ExpenseTypeModalState | false) => {
-    if (modalState) {
-      if (modalState.type === "add") {
-        return "add";
-      } else {
-        return "edit";
-      }
-    } else {
-      return "add";
-    }
-  };
-
-  const reflectDeletedExpenseType = (
-    currentExpenseType: MonthlyExpenseType,
-  ) => {
-    monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
-      return currentMonthlyExpenseTypes.filter(
-        (each) => each.id !== currentExpenseType.id,
-      );
-    });
-
-    monthYear.update((currentMonthYear) => {
-      if (currentMonthYear) {
-        return {
-          ...currentMonthYear,
-          limit: currentMonthYear.limit - currentExpenseType.limit,
-        };
-      } else {
-        return currentMonthYear;
-      }
-    });
-  };
-
   const onDelete = async () => {
     if (
       $user &&
@@ -250,7 +179,7 @@
         deleting = false;
         closeModal();
       } else {
-        setError('Make sure to remove linked expenses from this expense type!')
+        setError("Make sure to remove linked expenses from this expense type!");
       }
     }
   };

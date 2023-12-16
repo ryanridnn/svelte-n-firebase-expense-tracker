@@ -1,6 +1,6 @@
 <script lang="ts">
-  import ExpensesScreen from "@/components/ExpensesScreen.svelte";
-  import ExpenseTypesScreen from "@/components/ExpenseTypesScreen.svelte";
+  import ExpensesScreen from "@/components/Expenses/ExpensesScreen.svelte";
+  import ExpenseTypesScreen from "@/components/ExpenseTypes/ExpenseTypesScreen.svelte";
   import { getExpenses } from "@/firebase/expenses";
   import { monthYear } from "@/stores/monthYear";
   import { user } from "@/stores/user";

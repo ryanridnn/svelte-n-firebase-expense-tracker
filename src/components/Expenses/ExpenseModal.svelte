@@ -1,25 +1,39 @@
 <script lang="ts">
-  import Modal from "@/components/Modal.svelte";
-  import { expenseModalState, type ExpenseModalState } from "@/stores/modals";
-  import CurrencyInput from "@/components/CurrencyInput.svelte";
-  import { globalExpenseTypes } from "@/stores/expenseType";
-  import { getExpenseTypes } from "@/firebase/expenseTypes";
-  import { user } from "@/stores/user";
-  import type { Expense, ExpenseType } from "@/types";
   import moment from "moment";
+
+  // components
+  import Modal from "@/components/Common/Modal.svelte";
+  import CurrencyInput from "@/components/Common/CurrencyInput.svelte";
+  import LoadingButton from "@/components/Common/LoadingButton.svelte";
+  import ErrorAlert from "@/components/Common/ErrorAlert.svelte";
+
+  // stores
+  import { user } from "@/stores/user";
+  import { monthYear } from "@/stores/monthYear";
+  import { expenseModalState } from "@/stores/modals";
+  import { globalExpenseTypes } from "@/stores/expenseType";
+
+  // firebase
+  import { getExpenseTypes } from "@/firebase/expenseTypes";
   import {
     createNewExpense,
     deleteExpense,
     editExpense,
-    type EditExpensePayload,
-    type ExpenseChanged,
   } from "@/firebase/expenses";
-  import { monthYear } from "@/stores/monthYear";
-  import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
-  import { expenses } from "@/stores/expenses";
-  import LoadingButton from "@/components/LoadingButton.svelte";
+
+  // types
+  import type { ExpenseType } from "@/types";
+
+  // hooks
   import { useError } from "@/hooks/error";
-  import ErrorAlert from "@/components/ErrorAlert.svelte";
+
+  // helpers
+  import {
+    validateChange,
+    getModalMode,
+    reflectDeletedExpense,
+    reflectEditedExpense,
+  } from "@/components/Expenses/helpers";
 
   let open: boolean = false;
   let typeOptions: ExpenseType[] = [];
@@ -35,7 +49,6 @@
 
   const closeModal = () => {
     expenseModalState.set(false);
-    loading = false;
   };
 
   const fetchTypeOptions = async () => {
@@ -72,6 +85,7 @@
     amount = 0;
     note = "";
     type = "";
+    loading = false;
   };
 
   const onAmountChange = (e: number) => {
@@ -84,120 +98,6 @@
 
   const onTypeChange = (e: any) => {
     type = e.target.value;
-  };
-
-  const validateChange = () => {
-    const changed: ExpenseChanged = {
-      amount: false,
-      note: false,
-      type: false,
-      overall: false,
-    };
-
-    if (
-      $expenseModalState &&
-      $expenseModalState.type === "edit" &&
-      $expenseModalState.init
-    ) {
-      const currentExpense = $expenseModalState.init;
-
-      if (amount !== currentExpense.amount) {
-        changed.amount = true;
-      }
-
-      if (note !== currentExpense.note) {
-        changed.note = true;
-      }
-
-      if (type !== currentExpense.type) {
-        changed.type = true;
-      }
-
-      changed.overall = changed.amount || changed.note || changed.type;
-
-      return changed;
-    } else {
-      return changed;
-    }
-  };
-
-  const reflectEditedExpense = (
-    newExpense: EditExpensePayload,
-    changed: ExpenseChanged,
-    date: string,
-  ) => {
-    if (changed.amount) {
-      const diff = newExpense.amount - newExpense.initAmount;
-
-      monthYear.update((currentMonthYear) => {
-        if (currentMonthYear) {
-          return {
-            ...currentMonthYear,
-            amount: currentMonthYear.amount + diff,
-          };
-        } else {
-          return currentMonthYear;
-        }
-      });
-    }
-
-    if (changed.type) {
-      monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
-        return currentMonthlyExpenseTypes.map((each) => {
-          if (each.id === newExpense.initType) {
-            return {
-              ...each,
-              amount: each.amount - 1 * newExpense.initAmount,
-            };
-          } else if (each.id === newExpense.type) {
-            return {
-              ...each,
-              amount: each.amount + newExpense.amount,
-            };
-          } else {
-            return each;
-          }
-        });
-      });
-    } else if (changed.amount) {
-      const diff = newExpense.amount - newExpense.initAmount;
-      monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
-        return currentMonthlyExpenseTypes.map((each) => {
-          if (each.id == newExpense.type) {
-            return {
-              ...each,
-              amount: each.amount + diff,
-            };
-          } else {
-            return each;
-          }
-        });
-      });
-    }
-
-    expenses.update((currentGroupedExpensesArr) => {
-      return currentGroupedExpensesArr.map((eachGroup) => {
-        if (eachGroup.title === date) {
-          return {
-            ...eachGroup,
-            list: eachGroup.list.map((eachExpense) => {
-              if (eachExpense.id === newExpense.id) {
-                return {
-                  ...eachExpense,
-                  amount: newExpense.amount,
-                  note: newExpense.note,
-                  type: newExpense.type,
-                };
-              } else {
-                return eachExpense;
-              }
-            }),
-          };
-        } else {
-          return eachGroup;
-        }
-      });
-    });
   };
 
   const onSubmit = async () => {
@@ -229,7 +129,12 @@
         $expenseModalState.type === "edit" &&
         $expenseModalState.init
       ) {
-        const changed = validateChange();
+        const changed = validateChange({
+          expenseModalState: $expenseModalState,
+          amount,
+          note,
+          type,
+        });
         if (changed.overall) {
           loading = true;
           addingOrEditing = true;
@@ -263,59 +168,6 @@
     } else {
       setError("Make sure to enter some values!");
     }
-  };
-
-  const getModalMode = (modalState: ExpenseModalState | false) => {
-    if (modalState) {
-      if (modalState.type === "add") {
-        return "add";
-      } else {
-        return "edit";
-      }
-    } else {
-      return "add";
-    }
-  };
-
-  const reflectDeletedExpense = (currentExpense: Expense) => {
-    monthYear.update((currentMonthYear) => {
-      if (currentMonthYear) {
-        return {
-          ...currentMonthYear,
-          amount: currentMonthYear.amount - currentExpense.amount,
-        };
-      } else {
-        return currentMonthYear;
-      }
-    });
-
-    monthlyExpenseTypes.update((currentMonthlyExpenseTypes) => {
-      return currentMonthlyExpenseTypes.map((monthlyExpenseType) => {
-        if (monthlyExpenseType.id === currentExpense.id) {
-          return {
-            ...monthlyExpenseType,
-            amount: monthlyExpenseType.amount - currentExpense.amount,
-          };
-        } else {
-          return monthlyExpenseType;
-        }
-      });
-    });
-
-    expenses.update((currentGroupedExpensesArr) => {
-      return currentGroupedExpensesArr.map((eachGroup) => {
-        if (eachGroup.title === currentExpense.normalizedDate) {
-          return {
-            ...eachGroup,
-            list: eachGroup.list.filter(
-              (eachExpense) => eachExpense.id !== currentExpense.id,
-            ),
-          };
-        } else {
-          return eachGroup;
-        }
-      });
-    });
   };
 
   const onDelete = async () => {

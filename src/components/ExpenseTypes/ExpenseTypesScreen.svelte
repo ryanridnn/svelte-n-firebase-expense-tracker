@@ -1,7 +1,7 @@
 <script lang="ts">
   import { expenseTypeModalState } from "@/stores/modals";
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
-  import ExpenseTypeCard from "@/components/ExpenseTypeCard.svelte";
+  import ExpenseTypeCard from "@/components/ExpenseTypes/ExpenseTypeCard.svelte";
 
   const openModal = () => {
     expenseTypeModalState.set({
