@@ -10,7 +10,7 @@
   // stores
   import { user } from "@/stores/user";
   import { monthYear } from "@/stores/monthYear";
-  import { expenseModalState } from "@/stores/modals";
+  import { expenseModalState, type ExpenseModalState } from "@/stores/modals";
   import { globalExpenseTypes } from "@/stores/expenseType";
 
   // firebase
@@ -60,8 +60,8 @@
     }
   };
 
-  $: {
-    if ($expenseModalState) {
+  const onModalStateChanged = (state: ExpenseModalState | false) => {
+    if (state) {
       fetchTypeOptions();
       open = true;
     } else {
@@ -70,16 +70,14 @@
       clearValues();
     }
 
-    if (
-      $expenseModalState &&
-      $expenseModalState.type === "edit" &&
-      $expenseModalState.init
-    ) {
-      amount = $expenseModalState.init.amount;
-      note = $expenseModalState.init.note;
-      type = $expenseModalState.init.type;
+    if (state && state.type === "edit" && state.init) {
+      amount = state.init.amount;
+      note = state.init.note;
+      type = state.init.type;
     }
-  }
+  };
+
+  $: onModalStateChanged($expenseModalState);
 
   const clearValues = () => {
     amount = 0;

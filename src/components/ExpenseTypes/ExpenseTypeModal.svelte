@@ -1,7 +1,10 @@
 <script lang="ts">
   import Modal from "@/components/Common/Modal.svelte";
   import CurrencyInput from "@/components/Common/CurrencyInput.svelte";
-  import { expenseTypeModalState } from "@/stores/modals";
+  import {
+    expenseTypeModalState,
+    type ExpenseTypeModalState,
+  } from "@/stores/modals";
   import { user } from "@/stores/user";
   import { monthYear } from "@/stores/monthYear";
   import {
@@ -29,13 +32,13 @@
 
   const { error, setError, clearError } = useError();
 
-  $: {
-    if ($expenseTypeModalState) {
+  const onModalStateChanged = (state: ExpenseTypeModalState | false) => {
+    if (state) {
       open = true;
 
-      if ($expenseTypeModalState.init) {
-        name = $expenseTypeModalState.init.name;
-        limit = $expenseTypeModalState.init.limit;
+      if (state.init) {
+        name = state.init.name;
+        limit = state.init.limit;
       }
     } else {
       open = false;
@@ -43,7 +46,9 @@
       clearError();
       clearValues();
     }
-  }
+  };
+
+  $: onModalStateChanged($expenseTypeModalState);
 
   const clearValues = () => {
     name = "";
