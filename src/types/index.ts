@@ -32,6 +32,7 @@ export interface Expense {
   amount: number;
   note: string;
   type: string;
+  items?: string[];
   expenseType?: MonthlyExpenseType;
   createdAt: string;
   normalizedDate: string;

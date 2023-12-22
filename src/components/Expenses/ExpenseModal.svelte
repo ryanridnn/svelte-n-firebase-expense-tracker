@@ -3,6 +3,7 @@
 
   // components
   import Modal from "@/components/Common/Modal.svelte";
+  import Items from "@/components/Expenses/Items.svelte";
   import CurrencyInput from "@/components/Common/CurrencyInput.svelte";
   import LoadingButton from "@/components/Common/LoadingButton.svelte";
   import ErrorAlert from "@/components/Common/ErrorAlert.svelte";
@@ -41,6 +42,7 @@
   let amount: number = 0;
   let note: string = "";
   let type: string = "";
+  let items: string[] = [];
   let loading: boolean = false;
   let addingOrEditing: boolean = false;
   let deleting: boolean = false;
@@ -74,6 +76,7 @@
       amount = state.init.amount;
       note = state.init.note;
       type = state.init.type;
+      items = state.init.items || [];
     }
   };
 
@@ -97,6 +100,7 @@
         note,
         type,
         normalizedDate: moment().format("DD/MM/YYYY"),
+        items,
       };
 
       if ($expenseModalState.type === "add") {
@@ -124,6 +128,7 @@
           amount,
           note,
           type,
+          items,
         });
         if (changed.overall) {
           loading = true;
@@ -133,6 +138,7 @@
             amount,
             note,
             type,
+            items,
             initAmount: $expenseModalState.init.amount,
             initType: $expenseModalState.init.type,
           };
@@ -209,6 +215,9 @@
             {/each}
           </select>
         {/if}
+      </div>
+      <div class="pt-2">
+        <Items bind:items />
       </div>
     </div>
     <LoadingButton

@@ -30,3 +30,20 @@ body {
 .input {
   @apply bg-app-input-bg-normal focus:bg-app-input-bg-focus px-3 py-[10px] rounded-lg border-[1px] border-solid border-app-input-outline-normal focus:border-app-input-outline-focus focus:outline-none transition duration-150;
 }
+
+.btn-opaque {
+  @apply transition duration-150;
+}
+
+.btn-opaque:hover,
+.btn-opaque:focus {
+  opacity: 0.8;
+}
+
+.top-50 {
+  top: 50%;
+}
+
+.translate-y-min-50 {
+  transform: translateY(-50%);
+}

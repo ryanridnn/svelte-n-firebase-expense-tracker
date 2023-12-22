@@ -10,7 +10,8 @@ export default {
           400: "#365252", // input bg
           500: "#6A8B87", // bar bg
           600: "#1C3230", // toggler bg
-          700: "#8E93A8", // border bg
+          700: "#8E93A8", // border bg,
+          800: "#2C4646", // items bg
         },
         "app-theme": {
           yellow: "#F7E987",

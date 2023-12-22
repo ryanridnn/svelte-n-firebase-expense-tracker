@@ -14,6 +14,7 @@ export interface ValidateChangeProps {
   amount: number;
   note: string;
   type: string;
+  items: string[];
 }
 
 export const validateChange = ({
@@ -21,11 +22,13 @@ export const validateChange = ({
   amount,
   note,
   type,
+  items,
 }: ValidateChangeProps) => {
   const changed: ExpenseChanged = {
     amount: false,
     note: false,
     type: false,
+    items: false,
     overall: false,
   };
 
@@ -48,7 +51,12 @@ export const validateChange = ({
       changed.type = true;
     }
 
-    changed.overall = changed.amount || changed.note || changed.type;
+    if (JSON.stringify(currentExpense.items || []) !== JSON.stringify(items)) {
+      changed.items = true;
+    }
+
+    changed.overall =
+      changed.amount || changed.note || changed.type || changed.items;
 
     return changed;
   } else {
@@ -134,6 +142,7 @@ export const reflectEditedExpense = (
                 amount: newExpense.amount,
                 note: newExpense.note,
                 type: newExpense.type,
+                items: newExpense.items,
               };
             } else {
               return eachExpense;

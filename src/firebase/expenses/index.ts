@@ -117,6 +117,7 @@ export interface ExpenseChanged {
   overall: boolean;
   amount: boolean;
   note: boolean;
+  items: boolean;
   type: boolean;
 }
 
@@ -173,6 +174,7 @@ export const editExpense = async (
     amount: expense.amount,
     note: expense.note,
     type: expense.type,
+    items: expense.items,
   });
 };
 
