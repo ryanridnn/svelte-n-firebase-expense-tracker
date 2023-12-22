@@ -9,6 +9,7 @@
 
   const toggleAdding = () => {
     adding = !adding;
+    item = "";
 
     if (adding && input) {
       setTimeout(() => {
@@ -41,7 +42,7 @@
       <span>{adding ? "Cancel" : "Add Item"}</span>
     </button>
   </div>
-  <div class="mt-3 flex flex-col gap-3">
+  <div class={`flex flex-col gap-3 ${items.length > 0 && "mt-3"}`}>
     {#each items as item}
       <div
         class="flex justify-between items-center py-2 px-3 bg-app-bg-800 rounded-md"

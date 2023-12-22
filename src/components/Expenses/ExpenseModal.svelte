@@ -221,7 +221,7 @@
       </div>
     </div>
     <LoadingButton
-      class="btn btn-primary w-full rounded-md mt-7"
+      class="btn btn-primary w-full rounded-md mt-6"
       disabled={loading}
       on:click={onSubmit}
       loading={addingOrEditing}
