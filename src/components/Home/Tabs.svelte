@@ -7,8 +7,10 @@
   import { monthlyExpenseTypes } from "@/stores/monthlyExpenseTypes";
 
   import { expenses } from "@/stores/expenses";
+  import { screenLoadingState } from "@/stores/pageState";
   import { onMount } from "svelte";
   import { getMonthlyExpenseTypes } from "@/firebase/monthlyExpenseTypes";
+
   enum View {
     Expenses = "expenses",
     ExpenseTypes = "expenseTypes",
@@ -37,8 +39,10 @@
       monthlyExpenseTypesLoaded &&
       selected === View.Expenses
     ) {
+      screenLoadingState.set(true);
       getExpenses($user.id, $monthYear.id, $monthlyExpenseTypes).then(
         (retrievedExpenses) => {
+          screenLoadingState.set(false);
           expenses.set(retrievedExpenses);
         },
       );
@@ -47,8 +51,10 @@
 
   $: {
     if ($user && $monthYear && selected === View.ExpenseTypes) {
+      screenLoadingState.set(true);
       getMonthlyExpenseTypes($user.id, $monthYear.id).then(
         (retrievedMonthlyExpenseTypes) => {
+          screenLoadingState.set(false);
           monthlyExpenseTypes.set(retrievedMonthlyExpenseTypes);
         },
       );

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { expenseModalState } from "@/stores/modals";
   import { expenses } from "@/stores/expenses";
+  import { screenLoadingState } from "@/stores/pageState";
   import moment from "moment";
   import ExpenseCard from "@/components/Expenses/ExpenseCard.svelte";
 
@@ -10,20 +11,26 @@
 </script>
 
 <div class="mt-6 flex flex-col gap-8 pb-20">
-  {#each $expenses as group}
-    <div class="w-full">
-      <div class="flex justify-center w-full mx-auto text-xs font-semibold">
-        <div class="px-4 py-2 bg-app-bg-200 rounded-md">
-          {moment(group.title, "DD/MM/YYYY").format("DD MMMM YYYY")}
+  {#if !$screenLoadingState}
+    {#if $expenses.length > 0}
+      {#each $expenses as group}
+        <div class="w-full">
+          <div class="flex justify-center w-full mx-auto text-xs font-semibold">
+            <div class="px-4 py-2 bg-app-bg-200 rounded-md">
+              {moment(group.title, "DD/MM/YYYY").format("DD MMMM YYYY")}
+            </div>
+          </div>
+          <div class="flex flex-col gap-4 mt-5">
+            {#each group.list as expense}
+              <ExpenseCard {expense} />
+            {/each}
+          </div>
         </div>
-      </div>
-      <div class="flex flex-col gap-4 mt-5">
-        {#each group.list as expense}
-          <ExpenseCard {expense} />
-        {/each}
-      </div>
-    </div>
-  {/each}
+      {/each}
+    {:else}
+      <div class="flex justify-center pt-8 text-sm">No Expenses</div>
+    {/if}
+  {/if}
 </div>
 
 <div class="fixed bottom-0 left-0 w-full px-6 py-4 bg-app-bg-100">
