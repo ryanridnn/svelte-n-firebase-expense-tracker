@@ -80,7 +80,8 @@ const createMonthYear = async (userId: string, id: string) => {
   let expenseTypes = getSnapsData(expenseTypeSnaps);
   expenseTypes = expenseTypes.map((expenseType: any) => {
     return {
-      ref: expenseType.id,
+      id: expenseType.id,
+      name: expenseType.name,
       limit: expenseType.limit,
       amount: 0,
     };
@@ -105,7 +106,17 @@ const createMonthYear = async (userId: string, id: string) => {
   const newMonthYearSnap = await setDoc(monthYearRef, newMonthYear);
 
   const promises = expenseTypes.map(async (expenseType: any) => {
-    await addDoc(expenseTypesRef, expenseType);
+    const monthlyExpenseTypeRef = doc(
+      db,
+      DB_COLLECTIONS.Users,
+      userId,
+      DB_COLLECTIONS.monthYear,
+      id,
+      DB_COLLECTIONS.monthlyExpenseType,
+      expenseType.id,
+    );
+
+    await setDoc(monthlyExpenseTypeRef, _.omit(expenseType, "id"));
   });
 
   await Promise.all(promises);
