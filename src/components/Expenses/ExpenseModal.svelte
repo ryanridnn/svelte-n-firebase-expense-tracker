@@ -87,6 +87,7 @@
     note = "";
     type = "";
     loading = false;
+    items = [];
   };
 
   const onAmountChange = (e: number) => {
