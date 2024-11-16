@@ -3,6 +3,7 @@
   import { formatRupiah } from "@/helpers";
   import { Icon, ArrowLongRight } from "svelte-hero-icons";
   import { expenseModalState } from "@/stores/modals";
+  import { hideAmount } from "@/stores/hideAmount";
 
   export let expense: Expense;
 
@@ -20,7 +21,7 @@
 >
   <div class="flex justify-between items-center font-bold text-lg uppercase">
     <span>
-      {formatRupiah(expense.amount)}
+      {formatRupiah(expense.amount, $hideAmount)}
     </span>
     <div>
       <Icon src={ArrowLongRight} size="20" />

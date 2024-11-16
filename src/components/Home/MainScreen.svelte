@@ -2,8 +2,10 @@
   import Tabs from "@/components/Home/Tabs.svelte";
   import { formatRupiah, numToFixed } from "@/helpers";
   import { monthYear } from "@/stores/monthYear";
+  import { hideAmount, toggleHideAmount } from '@/stores/hideAmount'
+  import { Icon, Eye, EyeSlash } from "svelte-hero-icons";
 
-  $: amount = formatRupiah($monthYear?.amount || 0);
+  $: amount = formatRupiah($monthYear?.amount || 0, $hideAmount);
   $: limit = (() => {
     if (!$monthYear || $monthYear?.limit === 0) {
       return "-";
@@ -28,6 +30,21 @@
       </div>
       <div class="text-sm mt-2 font-medium text-app-text-grey-100">
         Used this month
+      </div>
+      <div class="flex justfiy-start mt-3">
+        <button on:click={toggleHideAmount} class="flex items-center gap-1.5 px-3 py-2 bg-white bg-opacity-10 text-sm text-slate-200 rounded-lg transtion active:bg-opacity-15 font-medium">
+          {#if $hideAmount}
+            <Icon src={Eye} class="size-4" />
+            <span>
+              Show Amount
+            </span>
+          {:else}
+            <Icon src={EyeSlash} class="size-4" />
+            <span>
+              Hide Amount
+            </span>
+          {/if}
+        </button>
       </div>
     {/if}
   </div>

@@ -3,6 +3,7 @@
   import { expenseTypeModalState } from "@/stores/modals";
   import type { MonthlyExpenseType } from "@/types";
   import { Icon, ArrowLongRight } from "svelte-hero-icons";
+  import { hideAmount } from '@/stores/hideAmount'
 
   export let monthlyExpenseType: MonthlyExpenseType;
 
@@ -62,7 +63,7 @@
       {percentage}%
     </div>
     <div>
-      {formatRupiah(monthlyExpenseType.amount)} out of {formatRupiah(
+      {formatRupiah(monthlyExpenseType.amount, $hideAmount)} out of {formatRupiah(
         monthlyExpenseType.limit,
       )}
     </div>
