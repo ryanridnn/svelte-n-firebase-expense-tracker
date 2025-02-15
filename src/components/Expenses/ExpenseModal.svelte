@@ -35,6 +35,7 @@
     reflectDeletedExpense,
     reflectEditedExpense,
   } from "@/components/Expenses/helpers";
+    import { onMount } from "svelte";
 
   let open: boolean = false;
   let typeOptions: ExpenseType[] = [];
@@ -190,6 +191,21 @@
 
   $: modalMode = getModalMode($expenseModalState);
   $: showDelete = $expenseModalState && $expenseModalState.type === "edit";
+
+
+  onMount(() => {
+    const cb = (e: KeyboardEvent) => {
+      if(e.altKey && e.code === 'KeyI') {
+        open = true
+      }
+    }
+
+    document.addEventListener('keydown', cb)
+
+    return () => {
+      document.removeEventListener('keydown' , cb)
+    }
+  })
 </script>
 
 <Modal {open} {closeModal}>
