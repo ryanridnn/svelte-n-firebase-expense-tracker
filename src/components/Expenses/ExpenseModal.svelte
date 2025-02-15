@@ -194,10 +194,17 @@
 
   let currencyInputWrapperRef: HTMLElement | null = null
 
+
+  $: console.log(open, 'open')
+
+
   onMount(() => {
     const cb = (e: KeyboardEvent) => {
       if(e.altKey && e.code === 'KeyI') {
-        open = true
+        expenseModalState.set({
+          type: 'add'
+        })
+
 
         setTimeout(() => {
           if(currencyInputWrapperRef) {
