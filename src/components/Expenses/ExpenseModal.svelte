@@ -192,11 +192,22 @@
   $: modalMode = getModalMode($expenseModalState);
   $: showDelete = $expenseModalState && $expenseModalState.type === "edit";
 
+  let currencyInputWrapperRef: HTMLElement | null = null
 
   onMount(() => {
     const cb = (e: KeyboardEvent) => {
       if(e.altKey && e.code === 'KeyI') {
         open = true
+
+        setTimeout(() => {
+          if(currencyInputWrapperRef) {
+            const input: HTMLInputElement | null = currencyInputWrapperRef.querySelector('.currency-input')
+
+            if(input && input.focus) {
+              input.focus()
+            }
+          }
+        }, 100)
       }
     }
 
@@ -215,7 +226,7 @@
   <div class="mt-4 font-medium">
     <ErrorAlert error={$error} addMarginBottom />
     <div class="flex flex-col gap-3">
-      <div class="flex flex-col gap-2">
+      <div bind:this={currencyInputWrapperRef} class="flex flex-col gap-2">
         <label for="expense-nominal">Amount</label>
         <CurrencyInput value={amount} onValueChange={onAmountChange} />
       </div>
