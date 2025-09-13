@@ -239,7 +239,7 @@
       </div>
       <div class="flex flex-col gap-2">
         <label for="expense-note">Note</label>
-        <input type="text" class="input" bind:value={note} id="expense-note" />
+        <input type="text" class="input" bind:value={note} id="expense-note" name="expense-note" />
       </div>
       <div class="flex flex-col gap-2">
         <label for="expense-type">Type</label>
