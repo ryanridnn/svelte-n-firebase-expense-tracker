@@ -5,6 +5,7 @@
   import moment from "moment";
   import ExpenseCard from "@/components/Expenses/ExpenseCard.svelte";
   import { formatRupiah } from "@/helpers";
+  import { hideAmount } from "@/stores/hideAmount";
 
   const openModal = () => {
     expenseModalState.set({ type: "add" });
@@ -17,10 +18,10 @@
       {#each $expenses as group}
         <div class="w-full">
           <div class="flex justify-between items-center w-full mx-auto">
-            <div class="text-xs font-bold">
+            <div class="text-sm font-bold">
               {moment(group.title, "DD/MM/YYYY").format("DD MMMM YYYY")}
             </div>
-            <div class="font-medium text-app-text-grey-100 text-xs">{formatRupiah(group.total)}</div>
+            <div class="font-medium text-app-text-grey-100 text-sm">{formatRupiah(group.total, $hideAmount)}</div>
           </div>
           <div class="flex flex-col gap-4 mt-5">
             {#each group.list as expense}
