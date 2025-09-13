@@ -4,6 +4,7 @@
   import { screenLoadingState } from "@/stores/pageState";
   import moment from "moment";
   import ExpenseCard from "@/components/Expenses/ExpenseCard.svelte";
+  import { formatRupiah } from "@/helpers";
 
   const openModal = () => {
     expenseModalState.set({ type: "add" });
@@ -15,10 +16,11 @@
     {#if $expenses.length > 0}
       {#each $expenses as group}
         <div class="w-full">
-          <div class="flex justify-center w-full mx-auto text-xs font-semibold">
-            <div class="px-4 py-2 bg-app-bg-200 rounded-md">
+          <div class="flex justify-between items-center w-full mx-auto">
+            <div class="text-xs font-bold">
               {moment(group.title, "DD/MM/YYYY").format("DD MMMM YYYY")}
             </div>
+            <div class="font-medium text-app-text-grey-100 text-xs">{formatRupiah(group.total)}</div>
           </div>
           <div class="flex flex-col gap-4 mt-5">
             {#each group.list as expense}

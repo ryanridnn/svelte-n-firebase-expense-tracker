@@ -43,6 +43,7 @@
       getExpenses($user.id, $monthYear.id, $monthlyExpenseTypes).then(
         (retrievedExpenses) => {
           screenLoadingState.set(false);
+          console.log(retrievedExpenses)
           expenses.set(retrievedExpenses);
         },
       );

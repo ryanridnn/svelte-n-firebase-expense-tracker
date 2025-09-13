@@ -16,7 +16,7 @@ import moment from "moment";
 import { getSnapsData, groupBasedOnKey } from "../helpers";
 import { expenseModalState } from "@/stores/modals";
 
-export interface ExpensePayload extends Omit<Expense, "id" | "createdAt"> {}
+export interface ExpensePayload extends Omit<Expense, "id" | "createdAt"> { }
 
 export const createNewExpense = async (
   userId: string,
@@ -110,7 +110,16 @@ export const getExpenses = async (
 
   const grouped = groupBasedOnKey<Expense, string>(expenses, "normalizedDate");
 
-  return grouped;
+  const mapped = grouped.map(group => {
+    const total = group.list.reduce((acc, row) => acc + row.amount, 0)
+
+    return {
+      ...group,
+      total
+    }
+  })
+
+  return mapped;
 };
 
 export interface ExpenseChanged {
