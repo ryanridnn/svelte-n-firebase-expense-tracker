@@ -39,14 +39,6 @@
 </div>
 
 <div class="fixed bottom-0 left-0 w-full px-6 py-4 bg-app-bg-100">
-  <div class="mb-4 flex items-center">
-    <button
-      class="bg-app-input-bg-normal border-[1px] border-solid border-app-input-outline-normal px-4 py-1.5 rounded-full"
-    >
-      <span>Parkir 2k</span>
-    </button>
-  </div>
-
   <button on:click={openModal} class="btn btn-primary w-full"
     >Add Expense</button
   >
