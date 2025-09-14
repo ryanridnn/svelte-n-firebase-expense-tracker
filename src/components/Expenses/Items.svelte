@@ -2,6 +2,8 @@
   import { Icon, Plus, Trash, XMark } from "svelte-hero-icons";
 
   export let items: string[];
+  export let addItem: (item: string) => void;
+  export let deleteItem: (item: string) => void;
 
   let adding: boolean = false;
   let item: string = "";
@@ -21,13 +23,14 @@
   const onAdd = () => {
     if (items.find((each) => each === item)) return;
     items = [...items, item];
+    addItem(item);
     item = "";
 
     toggleAdding();
   };
 
   const onDelete = (selectedItem: string) => {
-    items = items.filter((each) => each !== selectedItem);
+    deleteItem(selectedItem);
   };
 </script>
 

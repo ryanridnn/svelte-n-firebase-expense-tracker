@@ -16,3 +16,5 @@ export interface ExpenseTypeModalState {
 export const expenseTypeModalState = writable<ExpenseTypeModalState | false>(
   false,
 );
+
+export const shortcutModalState = writable<ExpenseModalState | false>(false);
