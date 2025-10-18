@@ -37,14 +37,14 @@
   };
 </script>
 
-<div class="px-6 overflow-x-auto mb-4">
-  <div class="flex items-center gap-2">
-    {#each $shortcuts.list as shortcut}
-      <button
-        class="px-3 py-1 text-[13px] main-gradient rounded-xl whitespace-nowrap hover:scale-[.9] transition"
-        on:click={() => selectShortcut(shortcut)}
-        >{shortcut.name + " " + formatRupiahShort(shortcut.amount)}
-      </button>
-    {/each}
-  </div>
+<div
+  class="px-6 overflow-x-auto mb-4 no-scrollbar flex items-center gap-2 pr-6"
+>
+  {#each $shortcuts.list as shortcut}
+    <button
+      class="px-3.5 py-1.5 text-sm main-gradient rounded-xl whitespace-nowrap hover:scale-[.9] transition"
+      on:click={() => selectShortcut(shortcut)}
+      >{shortcut.name + " " + formatRupiahShort(shortcut.amount)}
+    </button>
+  {/each}
 </div>

@@ -47,3 +47,7 @@ body {
 .translate-y-min-50 {
   transform: translateY(-50%);
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
