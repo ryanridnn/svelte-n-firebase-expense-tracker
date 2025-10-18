@@ -38,6 +38,18 @@ export interface Expense {
   normalizedDate: string;
 }
 
+export interface Shortcut {
+  id: string;
+  name: string;
+  amount: number;
+  note: string;
+  type: string;
+  items?: string[];
+  expenseType?: ExpenseType;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Grouped<T, U> {
   title: U;
   list: T[];

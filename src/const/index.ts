@@ -4,4 +4,5 @@ export enum DB_COLLECTIONS {
   expenseType = "expenseType",
   monthlyExpenseType = "monthlyExpenseType",
   expense = "expense",
+  shortcut = 'shortcut'
 }

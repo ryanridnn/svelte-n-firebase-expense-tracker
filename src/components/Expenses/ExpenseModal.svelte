@@ -59,6 +59,15 @@
       clearValues();
     }
 
+    if (state && state.type === "add" && state.shortcut) {
+      expense.set({
+        amount: state.shortcut.amount,
+        note: state.shortcut.note,
+        type: state.shortcut.type,
+        items: state.shortcut.items || [],
+      });
+    }
+
     if (state && state.type === "edit" && state.init) {
       expense.set({
         ...state.init,

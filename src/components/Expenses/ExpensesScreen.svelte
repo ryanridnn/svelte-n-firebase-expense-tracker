@@ -6,6 +6,7 @@
   import ExpenseCard from "@/components/Expenses/ExpenseCard.svelte";
   import { formatRupiah } from "@/helpers";
   import { hideAmount } from "@/stores/hideAmount";
+  import ShortcutList from "../Shortcuts/ShortcutList.svelte";
 
   const openModal = () => {
     expenseModalState.set({ type: "add" });
@@ -38,8 +39,12 @@
   {/if}
 </div>
 
-<div class="fixed bottom-0 left-0 w-full px-6 py-4 bg-app-bg-100">
-  <button on:click={openModal} class="btn btn-primary w-full"
-    >Add Expense</button
-  >
+<div class="fixed bottom-0 left-0 w-full py-4 bg-app-bg-100">
+  <ShortcutList />
+
+  <div class="px-6">
+    <button on:click={openModal} class="btn btn-primary w-full"
+      >Add Expense</button
+    >
+  </div>
 </div>
