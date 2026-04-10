@@ -28,12 +28,12 @@
     </div>
   </div>
   <div
-    class="flex items-center gap-2 mt-1 text-xs font-semibold text-app-text-grey-100"
+    class="flex items-center gap-2 mt-1 text-xs font-semibold text-app-text-grey-100 text-left"
   >
     <div class="">
       {expense.expenseType ? expense.expenseType.name : expense.type}
     </div>
     <div class="w-[4px] h-[4px] rounded-full bg-[#677876]"></div>
-    <div class="">{expense.note}</div>
+    <div class="truncate pr-10">{expense.note}</div>
   </div>
 </button>

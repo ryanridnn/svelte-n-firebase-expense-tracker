@@ -13,13 +13,17 @@
   <div
     class="bg-app-bg-300 rounded-t-3xl max-h-screen overflow-hidden flex flex-col"
   >
-    <div class="flex justify-between py-6 min-h-0 px-5">
+    <div class="flex justify-between items-center py-6 min-h-0 px-5">
       <div>
         <slot name="header" />
       </div>
-      <button on:click={closeModal} class="">
-        <Icon src={XMark} size="28" />
-      </button>
+      <div class="flex items-center gap-2">
+        <slot name="actions" />
+
+        <button on:click={closeModal} class="">
+          <Icon src={XMark} size="28" />
+        </button>
+      </div>
     </div>
     <div class="h-full overflow-y-auto min-h-0 px-5 pb-5">
       <slot />

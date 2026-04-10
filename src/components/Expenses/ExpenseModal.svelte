@@ -31,8 +31,13 @@
   } from "@/components/Expenses/helpers";
   import { onMount } from "svelte";
   import { useExpenseStates } from "@/hooks/useExpenseStates";
+  import { Camera, Icon } from "svelte-hero-icons";
+  import { scanImage } from "@/ai";
+  import { globalExpenseTypes } from "@/stores/expenseType";
 
   let open: boolean = false;
+
+  let inputRef: HTMLInputElement;
 
   const expense = useExpenseStates();
   let refreshExpensesDepedency: string | null = null;
@@ -86,6 +91,10 @@
       items: [],
     });
     loading = false;
+  };
+
+  const onPhotoButtonClick = () => {
+    inputRef.click();
   };
 
   const onSubmit = async () => {
@@ -217,12 +226,74 @@
       document.removeEventListener("keydown", cb);
     };
   });
+
+  let loading_ai = false;
+
+  $: expenseTypes = $globalExpenseTypes;
+
+  const onFileChange = async (
+    e: Event & { currentTarget: EventTarget & HTMLInputElement },
+  ) => {
+    const files = e.currentTarget.files;
+
+    if (files) {
+      const file = files[0];
+
+      loading_ai = true;
+      try {
+        const resp = await scanImage(file);
+
+        let expenseType = "";
+        const personal = expenseTypes.find(
+          (each) => each.name.toLowerCase() === "personal",
+        );
+
+        if (personal) {
+          expenseType = personal.id;
+        } else if (expenseTypes[0]) {
+          expenseType = expenseTypes[0].id;
+        }
+
+        expense.set({
+          amount: resp.expense,
+          note: resp.note,
+          items: resp.items || [],
+          type: expenseType,
+        });
+      } catch (e) {}
+    }
+
+    loading_ai = false;
+    if (e.target) {
+      // @ts-ignore
+      e.target.value = "";
+    }
+  };
 </script>
 
 <Modal {open} {closeModal}>
   <span class="font-bold text-xl" slot="header"
     >{modalMode === "edit" ? "Edit Expense" : "Add Expense"}</span
   >
+  <div slot="actions">
+    <button
+      class="rounded-full bg-white bg-opacity-10 active:bg-opacity-20 transition flex justify-center items-center size-9"
+      on:click={onPhotoButtonClick}
+    >
+      {#if loading_ai}
+        <span class="loader"></span>
+      {:else}
+        <Icon src={Camera} size="20" />
+      {/if}
+    </button>
+    <input
+      type="file"
+      accept="image/*"
+      class="hidden"
+      bind:this={inputRef}
+      on:change={onFileChange}
+    />
+  </div>
   <div class="mt-4 font-medium">
     <ErrorAlert error={$error} addMarginBottom />
     <ExpenseForm
