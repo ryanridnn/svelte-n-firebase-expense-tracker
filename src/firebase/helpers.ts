@@ -17,8 +17,8 @@ export const getSnapsData = (snaps: any) => {
 
 export const getSnapData = (snap: any) => {
   return {
-    id: snap.id,
     ...snap.data(),
+    id: snap.id,
   };
 };
 

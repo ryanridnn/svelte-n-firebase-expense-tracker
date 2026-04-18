@@ -132,7 +132,9 @@
           $user.id,
           $monthYear.id,
           $expenses.map((expense) => ({
-            ...expense,
+            amount: expense.amount,
+            note: expense.note,
+            type: expense.type,
           })),
         );
 
