@@ -54,3 +54,10 @@ export interface Grouped<T, U> {
   title: U;
   list: T[];
 }
+
+export type ExpenseInput = {
+  id: string;
+  amount: number;
+  note: string;
+  type: string;
+};

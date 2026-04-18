@@ -34,8 +34,10 @@
     "firebase": "^10.7.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
+    "svelte-french-toast": "^1.2.0",
     "svelte-hero-icons": "^5.0.0",
     "svelte-navigator": "^3.2.2",
-    "svelte-routing": "^2.9.0"
+    "svelte-routing": "^2.9.0",
+    "uuid": "^13.0.0"
   }
 }

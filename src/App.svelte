@@ -6,6 +6,7 @@
   import AuthRedirector from "@/components/Layout/AuthRedirector.svelte";
   import Layout from "@/components/Layout/Layout.svelte";
   import Shortcuts from "@/components/Shortcuts/Shortcuts.svelte";
+  import { Toaster } from "svelte-french-toast";
 </script>
 
 <Router>
@@ -18,5 +19,7 @@
     </Layout>
   </main>
 </Router>
+
+<Toaster></Toaster>
 
 <style></style>

@@ -16,7 +16,92 @@ import moment from "moment";
 import { getSnapsData, groupBasedOnKey } from "../helpers";
 import { expenseModalState } from "@/stores/modals";
 
-export interface ExpensePayload extends Omit<Expense, "id" | "createdAt"> { }
+export interface ExpensePayload extends Omit<Expense, "id" | "createdAt"> {}
+
+export const createNewExpenses = async (
+  userId: string,
+  monthYearId: string,
+  expenses: Omit<ExpensePayload, "normalizedDate">[],
+): Promise<Expense[]> => {
+  const monthYearRef = doc(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+  );
+  // const expenseTypeRef = doc(db, DB_COLLECTIONS.Users, userId, DB_COLLECTIONS.expenseType, typeId)
+  let types: Map<string, number> = new Map();
+
+  expenses.forEach((expense) => {
+    if (types.has(expense.type)) {
+      types.set(expense.type, types.get(expense.type)! + expense.amount);
+    } else {
+      types.set(expense.type, expense.amount);
+    }
+  });
+
+  const expenseCollectionsRef = collection(
+    db,
+    DB_COLLECTIONS.Users,
+    userId,
+    DB_COLLECTIONS.monthYear,
+    monthYearId,
+    DB_COLLECTIONS.expense,
+  );
+
+  const totalExpenses = expenses.reduce((acc, row) => acc + row.amount, 0);
+
+  const amountPayload = {
+    amount: increment(totalExpenses),
+  };
+
+  let promises: Promise<any>[] = [];
+
+  promises.push(updateDoc(monthYearRef, amountPayload));
+
+  promises.push(
+    ...types.entries().map(([type, amount]) => {
+      const ref = doc(
+        db,
+        DB_COLLECTIONS.Users,
+        userId,
+        DB_COLLECTIONS.monthYear,
+        monthYearId,
+        DB_COLLECTIONS.monthlyExpenseType,
+        type,
+      );
+      return updateDoc(ref, {
+        amount: increment(amount),
+      });
+    }),
+  );
+
+  let new_expenses: Expense[] = [];
+
+  promises.push(
+    ...expenses.map(async (expense) => {
+      const newExpenseSnap = await addDoc(expenseCollectionsRef, {
+        ...expense,
+        createdAt: serverTimestamp(),
+        normalizedDate: moment().format("DD/MM/YYYY"),
+      });
+
+      new_expenses.push({
+        id: newExpenseSnap.id,
+        ...expense,
+        createdAt: moment().toISOString(),
+        normalizedDate: moment().format("DD/MM/YYYY"),
+      });
+
+      return newExpenseSnap;
+    }),
+  );
+
+  await Promise.all(promises);
+
+  return new_expenses;
+};
 
 export const createNewExpense = async (
   userId: string,
@@ -110,14 +195,14 @@ export const getExpenses = async (
 
   const grouped = groupBasedOnKey<Expense, string>(expenses, "normalizedDate");
 
-  const mapped = grouped.map(group => {
-    const total = group.list.reduce((acc, row) => acc + row.amount, 0)
+  const mapped = grouped.map((group) => {
+    const total = group.list.reduce((acc, row) => acc + row.amount, 0);
 
     return {
       ...group,
-      total
-    }
-  })
+      total,
+    };
+  });
 
   return mapped;
 };
